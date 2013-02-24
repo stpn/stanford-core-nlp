@@ -16,7 +16,7 @@ module StanfordCoreNLP
   
   # Load the JVM with a minimum heap size of 512MB,
   # and a maximum heap size of 1024MB.
-  self.jvm_args = ['-Xms512M', '-Xmx1024M']
+  self.jvm_args = ['-Xms1024M', '-Xmx2048M']
   
   # Turn logging off by default.
   self.log_file = nil
