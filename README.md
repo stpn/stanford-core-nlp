@@ -1,24 +1,23 @@
+[![Build Status](https://secure.travis-ci.org/louismullie/stanford-core-nlp.png)](http://travis-ci.org/louismullie/stanford-core-nlp)
+
 **About**
   
-This gem provides high-level Ruby bindings to the [Stanford Core NLP package](http://nlp.stanford.edu/software/corenlp.shtml), a set natural language processing tools for tokenization, part-of-speech tagging, lemmatization, and parsing of several languages, as well as named entity recognition and coreference resolution in English. This gem is compatible with Ruby 1.9.2 and above.
+This gem provides high-level Ruby bindings to the [Stanford Core NLP package](http://nlp.stanford.edu/software/corenlp.shtml), a set natural language processing tools for tokenization, sentence segmentation, part-of-speech tagging, lemmatization, and parsing of English, French and German. The package also provides named entity recognition and coreference resolution for English.
 
-If you are looking for an full-scale natural language processing framework in Ruby, have a look at [Treat](https://github.com/louismullie/treat).
+This gem is compatible with Ruby 1.9.2 and 1.9.3 as well as JRuby 1.7.1. It is tested on both Java 6 and Java 7.
 
 **Installing**
 
-_Note: This gem uses the Ruby-Java Bridge (Rjb), which currently does not support Java 7. Therefore, if you have installed Java 7, you should set your JAVA_HOME to point to your old Java 6 install before installing Rjb; for example, `export "JAVA_HOME=/usr/lib/jvm/java-6-openjdk/"`._
+First, install the gem: `gem install stanford-core-nlp`. Then, download the Stanford Core NLP JAR and model files. Two packages are available:
 
-First, install the gem: `gem install stanford-core-nlp`. Then, download the Stanford Core NLP JAR and model files. Three different packages are available:
-
-* A [minimal package for English](http://louismullie.com/treat/stanford-core-nlp-minimal.zip) with one tagger model  and one parser model for English.
-* A [full package for English](http://louismullie.com/treat/stanford-core-nlp-english.zip), with all tagger and parser models for English, plus the coreference resolution and named entity recognition models.
-* A [full package for all languages](http://louismullie.com/treat/stanford-core-nlp-all.zip), including tagger and parser models for English, French, German, Arabic and Chinese.
+* A [minimal package](http://louismullie.com/treat/stanford-core-nlp-minimal.zip) with the default tagger and parser models for English, French and German.
+* A [full package](http://louismullie.com/treat/stanford-core-nlp-full.zip), with all of the tagger and parser models for English, French and German, as well as named entity and coreference resolution models for English.
 
 Place the contents of the extracted archive inside the /bin/ folder of the stanford-core-nlp gem (e.g. [...]/gems/stanford-core-nlp-0.x/bin/).
 
 **Configuration**
 
-After installing and requiring the gem (`require 'stanford-core-nlp'`), you may want to set some optional configuration options. Here are some examples:
+You may want to set some optional configuration options. Here are some examples:
 
 ```ruby
 # Set an alternative path to look for the JAR files
@@ -37,9 +36,6 @@ StanfordCoreNLP.jvm_args = ['-option1', '-option2']
 # Redirect VM output to log.txt
 StanfordCoreNLP.log_file = 'log.txt'
 
-# Use the model files for a different language than English.
-StanfordCoreNLP.use(:french)
-
 # Change a specific model file.
 StanfordCoreNLP.set_model('pos.model', 'english-left3words-distsim.tagger')
 ```
@@ -47,12 +43,15 @@ StanfordCoreNLP.set_model('pos.model', 'english-left3words-distsim.tagger')
 **Using the gem**
 
 ```ruby
+# Use the model files for a different language than English.
+StanfordCoreNLP.use :french # or :german
+
 text = 'Angela Merkel met Nicolas Sarkozy on January 25th in ' +
    'Berlin to discuss a new austerity package. Sarkozy ' +
    'looked pleased, but Merkel was dismayed.'
 
 pipeline =  StanfordCoreNLP.load(:tokenize, :ssplit, :pos, :lemma, :parse, :ner, :dcoref)
-text = StanfordCoreNLP::Text.new(text)
+text = StanfordCoreNLP::Annotation.new(text)
 pipeline.annotate(text)
 
 text.get(:sentences).each do |sentence|
@@ -71,19 +70,23 @@ text.get(:sentences).each do |sentence|
     # Named entity tag
     puts token.get(:named_entity_tag).to_s
     # Coreference
-   puts token.get(:coref_cluster_id).to_s
-    # Also of interest: coref, coref_chain, coref_cluster, coref_dest, coref_graph.
+    puts token.get(:coref_cluster_id).to_s
+    # Also of interest: coref, coref_chain, 
+    # coref_cluster, coref_dest, coref_graph.
   end
 end
 ```
 
-> Important: You need to load the StanfordCoreNLP pipeline before using the StanfordCoreNLP::Text class.
+> Important: You need to load the StanfordCoreNLP pipeline before using the StanfordCoreNLP::Annotation class.
 
-A good reference for names of annotations are the Stanford Javadocs for [CoreAnnotations](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/CoreAnnotations.html), [CoreCorefAnnotations](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/dcoref/CorefCoreAnnotations.html), and [TreeCoreAnnotations](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/TreeCoreAnnotations.html). For a full list of all possible annotations, see the 'config.rb' file inside the gem. The Ruby symbol (e.g. `:named_entity_tag`) corresponding to a Java annotation class follows the simple un-camel-casing convention, with 'Annotation' at the end removed. For example, the annotation `NamedEntityTagAnnotation` translates to `:named_entity_tag`, `PartOfSpeechAnnotation` to `:part_of_speech`, etc.
+The Ruby symbol (e.g. `:named_entity_tag`) corresponding to a Java annotation class is the `snake_case` of the class name, with 'Annotation' at the end removed. For example, `NamedEntityTagAnnotation` translates to `:named_entity_tag`, `PartOfSpeechAnnotation` to `:part_of_speech`, etc.
+
+A good reference for names of annotations are the Stanford Javadocs for [CoreAnnotations](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/ling/CoreAnnotations.html), [CoreCorefAnnotations](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/dcoref/CorefCoreAnnotations.html), and [TreeCoreAnnotations](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/TreeCoreAnnotations.html). For a full list of all possible annotations, see the `config.rb` file inside the gem. 
+
 
 **Loading specific classes**
 
-You may also want to load your own classes from the Stanford NLP to do more specific tasks. The gem provides an API to do this:
+You may want to load additional Java classes (including any class from the Stanford NLP packages). The gem provides an API for this:
 
 ```ruby
 # Default base class is edu.stanford.nlp.pipeline.
@@ -121,10 +124,8 @@ Here is a full list of annotator classes provided by the Stanford Core NLP packa
 Here is a full list of the default models for the Stanford Core NLP pipeline. You can change these models individually using `StanfordCoreNLP.set_model` (see above).
 
 * 'pos.model' - 'english-left3words-distsim.tagger'
-* 'ner.model.3class' - 'all.3class.distsim.crf.ser.gz'
-* 'ner.model.7class' - 'muc.7class.distsim.crf.ser.gz'
-* 'ner.model.MISCclass' -- 'conll.4class.distsim.crf.ser.gz'
-* 'parser.model' - 'englishPCFG.ser.gz'
+* 'ner.model' - 'all.3class.distsim.crf.ser.gz'
+* 'parse.model' - 'englishPCFG.ser.gz'
 * 'dcoref.demonym' - 'demonyms.txt'
 * 'dcoref.animate' - 'animate.unigrams.txt'
 * 'dcoref.female' - 'female.unigrams.txt'
@@ -138,4 +139,7 @@ Here is a full list of the default models for the Stanford Core NLP pipeline. Yo
 
 **Contributing**
 
-Feel free to fork the project and send me a pull request!
+Simple.
+
+1. Fork the project.
+2. Send me a pull request!
