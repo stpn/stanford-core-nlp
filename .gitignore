@@ -3,3 +3,6 @@
 *.DS_Store
 *swp
 *.gem
+
+# downloaded package
+bin/package
