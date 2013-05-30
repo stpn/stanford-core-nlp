@@ -1,9 +1,6 @@
 require 'stanford-core-nlp/config'
 
 module StanfordCoreNLP
-
-  VERSION = '0.5.1'
-
   require 'bind-it'
   extend BindIt::Binding
 
@@ -20,7 +17,7 @@ module StanfordCoreNLP
 
   # Load the JVM with a minimum heap size of 512MB,
   # and a maximum heap size of 1024MB.
-  StanfordCoreNLP.self.jvm_args = ['-Xms1024M',  '-Xmx2048M']
+  StanfordCoreNLP.jvm_args = ['-Xms1024M',  '-Xmx2048M']
   
   # Turn logging off by default.
   StanfordCoreNLP.log_file = nil

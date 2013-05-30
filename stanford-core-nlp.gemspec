@@ -1,7 +1,8 @@
-# -*- encoding: utf-8 -*-
-$:.push File.join(File.expand_path(File.dirname(__FILE__)), '../lib')
+# encoding: utf-8
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'stanford-core-nlp'
+require 'stanford-core-nlp/version'
 
 Gem::Specification.new do |s|
   s.name        = 'stanford-core-nlp'
